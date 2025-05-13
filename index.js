@@ -8,7 +8,7 @@ const app = express();
 // Configuration
 const PORT = process.env.PORT || 3000;
 const TEXTBELT_API_KEY = process.env.TEXTBELT_API_KEY; // Your TextBelt API key
-const MORNING_TIME = process.env.MORNING_TIME || '08:00'; // Default 8:00 AM
+const MORNING_TIME = process.env.MORNING_TIME || '06:00'; // Default 8:00 AM
 
 const GREENAPI_ID_INSTANCE = process.env.GREENAPI_ID_INSTANCE;
 const GREENAPI_API_TOKEN = process.env.GREENAPI_API_TOKEN;
@@ -25,7 +25,32 @@ const messageTemplates = [
   "Morning! Remember to drink water and take deep breaths today. Love Ace.",
   "Hello! A new day brings new opportunities. Make the most of it! Love Ace.",
   "Good morning! Don't forget to take a moment for yourself today. Love Ace.",
-  "Rise and shine! Today is a blank canvas - paint it beautifully. Love Ace."
+  "Rise and shine! Today is a blank canvas - paint it beautifully. Love Ace.",
+  "Morning sunshine! Just a heads up: coffee is now officially mandatory. Love Ace.",
+  "Good morning! Warning: today contains excessive happiness and spontaneous smiling. Prolonged exposure may lead to permanent joy. Love Ace.",
+  "Hey sleepyhead! Your bed has filed a formal complaint about abandonment. Better get back there tonight! Love Ace.",
+  "Morning! Remember: today's goals don't care about yesterday's excuses. Unless yesterday's excuse was 'I'm a zombie' - that's valid. Love Ace.",
+  "Good morning! Your daily dose of motivation has been delivered. Side effects include spontaneous dancing and excessive optimism. Love Ace.",
+  "Morning! Just checked the forecast: 100% chance of awesomeness today. Love Ace.",
+  "Hey! Your morning coffee called - it's waiting impatiently. Love Ace.",
+  "Rise and shine! Today's agenda includes conquering the world... or at least making your bed. Baby steps count! Love Ace.",
+  "Good morning! Your daily reminder that you're amazing, capable, and probably need more coffee. Love Ace.",
+  "Morning! Newsflash: hitting snooze repeatedly doesn't count as exercise. Love Ace.",
+  "Morning! Important announcement: your bed has officially been evicted. Time to start the day! Love Ace.",
+  "Good morning! Science fact: morning grumpiness is directly proportional to distance from coffee. Love Ace.",
+  "Hey! Breaking news: your future self thanks you for getting out of bed. (Even if your present self disagrees.) Love Ace.",
+  "Morning! Daily reminder: you're not lazy, you're just on energy-saving mode. Love Ace.",
+  "Good morning! Alert: today's schedule includes eating pizza for breakfast (just kidding... or am I?). Love Ace.",
+  "Good morning, my love. Just wanted to remind you how much you mean to me. Love Ace.",
+  "Morning, beautiful. Waking up is easier when I know I get to love you all day. Love Ace.",
+  "Rise and shine, sweetheart. Every day with you is a blessing. Love Ace.",
+  "Good morning, my heart. Hope your day is as lovely and kind as you are. Love Ace.",
+  "Hey love, just thinking about your smile this morning. Hope it lights up your day too. Love Ace.",
+  "Morning, babe. I miss you already—and the day just started. Love Ace.",
+  "Good morning to the one who makes my world brighter just by existing. Love Ace.",
+  "Woke up this morning grateful for you, as always. Have an amazing day, my love. Love Ace.",
+  "Hey sleepy love. Wish I could start the day wrapped in your arms. Love Ace.",
+  "Morning darling. Just a little note to say—I’m still crazy about you. Love Ace."
 ];
 
 // Function to get a random message from templates
