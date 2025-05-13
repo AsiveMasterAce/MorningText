@@ -11,7 +11,7 @@ const TEXTBELT_API_KEY = process.env.TEXTBELT_API_KEY; // Your TextBelt API key
 const MORNING_TIME = process.env.MORNING_TIME || '06:00'; // Default 8:00 AM
 
 const GREENAPI_ID_INSTANCE = process.env.GREENAPI_ID_INSTANCE;
-const GREENAPI_API_TOKEN = process.env.GREENAPI_API_TOKEN;
+const GREENAPI_API_TOKEN = process.env.GREENAPI_API_TOKAEN;
 
 // Handle multiple phone numbers
 // Phone numbers can be specified in the .env file as comma-separated values
@@ -250,6 +250,10 @@ app.get('/send-test', async (req, res) => {
   `);
 });
 
+app.get('/wakeup', (req, res) => {
+  console.log('Service woken up by scheduler at:', new Date().toISOString());
+  res.status(200).send('Service is awake');
+});
 // Start the server
 app.listen(PORT, () => {
   console.log(`Morning SMS service running on port ${PORT}`);
