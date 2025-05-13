@@ -118,7 +118,7 @@ async function sendMorningSMS() {
     try {
       const message = getRandomMessage();
       const date = new Date().toLocaleDateString();
-      const fullMessage = `${message} [${date}]`;
+      const fullMessage = `${message}`;
   
       if (PHONE_NUMBERS.length === 0) {
         console.error('No phone numbers configured. Please check your .env file.');
