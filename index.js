@@ -1,4 +1,4 @@
-// Morning SMS Service using TextBelt API and Node.js
+// Morning SMS Service using Green API for WhatsApp messages
 require('dotenv').config();
 const axios = require('axios');
 const cron = require('node-cron');
@@ -7,21 +7,17 @@ const app = express();
 
 // Configuration
 const PORT = process.env.PORT || 3000;
-const TEXTBELT_API_KEY = process.env.TEXTBELT_API_KEY; // Your TextBelt API key
-const MORNING_TIME = process.env.MORNING_TIME || '06:00'; // Default 8:00 AM
+const MORNING_TIME = process.env.MORNING_TIME || '06:00'; // Default 6:00 AM
 
+// Green API configuration for WhatsApp
 const GREENAPI_ID_INSTANCE = process.env.GREENAPI_ID_INSTANCE;
-const GREENAPI_API_TOKEN = process.env.GREENAPI_API_TOKAEN;
+const GREENAPI_API_TOKEN = process.env.GREENAPI_API_TOKEN; // Fixed variable name
 
-
-
-// Handle multiple phone numbers
-// Phone numbers can be specified in the .env file as comma-separated values
-
+// Handle multiple phone numbers from env
 const phoneNumbersString = process.env.PHONE_NUMBERS || process.env.PHONE_NUMBER || '';
 const PHONE_NUMBERS = phoneNumbersString.split(',').map(num => num.trim()).filter(num => num);
 
-// Message templates - you can customize these or add more
+// Message templates
 const messageTemplates = [
   "Good morning! Rise and shine! Today is going to be amazing. Love Ace.",
   "Morning! Remember to drink water and take deep breaths today. Love Ace.",
@@ -52,7 +48,7 @@ const messageTemplates = [
   "Good morning to the one who makes my world brighter just by existing. Love Ace.",
   "Woke up this morning grateful for you, as always. Have an amazing day, my love. Love Ace.",
   "Hey sleepy love. Wish I could start the day wrapped in your arms. Love Ace.",
-  "Morning darling. Just a little note to say—I’m still crazy about you. Love Ace."
+  "Morning darling. Just a little note to say—I'm still crazy about you. Love Ace."
 ];
 
 // Function to get a random message from templates
@@ -61,119 +57,73 @@ function getRandomMessage() {
   return messageTemplates[randomIndex];
 }
 
-// Function to send SMS using TextBelt API
-
-//SMS
-
-// async function sendMorningSMS() {
-//   try {
-//     const message = getRandomMessage();
-//     const date = new Date().toLocaleDateString();
-//     const fullMessage = `${message} [${date}]`;
+// Function to send WhatsApp message using Green API
+async function sendMorningMessage() {
+  try {
+    const message = getRandomMessage();
+    const fullMessage = `${message}`;
     
-//     if (PHONE_NUMBERS.length === 0) {
-//       console.error('No phone numbers configured. Please check your .env file.');
-//       return false;
-//     }
-    
-//     console.log(`Attempting to send SMS: "${fullMessage}" to ${PHONE_NUMBERS.length} recipients`);
-    
-//     // Send to all phone numbers
-//     const results = await Promise.all(
-//       PHONE_NUMBERS.map(async (phoneNumber) => {
-//         try {
-//           console.log(`Sending to ${phoneNumber}...`);
-//           const response = await axios.post('https://textbelt.com/text', {
-//             phone: phoneNumber,
-//             message: fullMessage,
-//             key: TEXTBELT_API_KEY
-//           });
-          
-//           console.log(`Response for ${phoneNumber}:`, response.data);
-//           return {
-//             phoneNumber,
-//             success: response.data.success,
-//             error: response.data.error || null
-//           };
-//         } catch (error) {
-//           console.error(`Error sending to ${phoneNumber}:`, error.message);
-//           return {
-//             phoneNumber,
-//             success: false,
-//             error: error.message
-//           };
-//         }
-//       })
-//     );
-    
-//     // Log the overall results
-//     const successfulSends = results.filter(r => r.success).length;
-//     console.log(`Successfully sent ${successfulSends} out of ${PHONE_NUMBERS.length} messages`);
-    
-//     return successfulSends > 0;
-//   } catch (error) {
-//     console.error('Error in sendMorningSMS function:', error.message);
-//     return false;
-//   }
-// }
-async function sendMorningSMS() {
-    try {
-      const message = getRandomMessage();
-      const date = new Date().toLocaleDateString();
-      const fullMessage = `${message}`;
-  
-      if (PHONE_NUMBERS.length === 0) {
-        console.error('No phone numbers configured. Please check your .env file.');
-        return false;
-      }
-  
-      console.log(`Sending WhatsApp message to ${PHONE_NUMBERS.length} recipient(s): "${fullMessage}"`);
-  
-      const results = await Promise.all(
-        PHONE_NUMBERS.map(async (phoneNumber) => {
-          try {
-            const response = await axios.post(
-              `https://api.green-api.com/waInstance${GREENAPI_ID_INSTANCE}/sendMessage/${GREENAPI_API_TOKEN}`,
-              {
-                chatId: `${phoneNumber}@c.us`,
-                message: fullMessage
-              }
-            );
-  
-            console.log(`Sent to ${phoneNumber}:`, response.data);
-            return {
-              phoneNumber,
-              success: response.data.idMessage != null,
-              error: null
-            };
-          } catch (error) {
-            console.error(`Error sending to ${phoneNumber}:`, error.response?.data || error.message);
-            return {
-              phoneNumber,
-              success: false,
-              error: error.message
-            };
-          }
-        })
-      );
-  
-      const successfulSends = results.filter(r => r.success).length;
-      console.log(`Successfully sent ${successfulSends} out of ${PHONE_NUMBERS.length} messages`);
-  
-      return successfulSends > 0;
-    } catch (error) {
-      console.error('Error in sendMorningSMS:', error.message);
+    if (PHONE_NUMBERS.length === 0) {
+      console.error('No phone numbers configured. Please check your .env file.');
       return false;
     }
+    
+    // Check if Green API credentials are configured
+    if (!GREENAPI_ID_INSTANCE || !GREENAPI_API_TOKEN) {
+      console.error('Green API credentials not properly configured. Please check your .env file.');
+      return false;
+    }
+    
+    console.log(`Sending WhatsApp message to ${PHONE_NUMBERS.length} recipient(s): "${fullMessage}"`);
+    
+    const results = await Promise.all(
+      PHONE_NUMBERS.map(async (phoneNumber) => {
+        try {
+          // Format phone number to ensure it's in the correct format (remove any '+' if present)
+          const formattedPhone = phoneNumber.replace(/^\+/, '');
+          
+          const response = await axios.post(
+            `https://api.green-api.com/waInstance${GREENAPI_ID_INSTANCE}/sendMessage/${GREENAPI_API_TOKEN}`,
+            {
+              chatId: `${formattedPhone}@c.us`,
+              message: fullMessage
+            }
+          );
+          
+          console.log(`Sent to ${formattedPhone}:`, response.data);
+          return {
+            phoneNumber: formattedPhone,
+            success: response.data.idMessage != null,
+            error: null
+          };
+        } catch (error) {
+          console.error(`Error sending to ${phoneNumber}:`, error.response?.data || error.message);
+          return {
+            phoneNumber,
+            success: false,
+            error: error.message
+          };
+        }
+      })
+    );
+    
+    const successfulSends = results.filter(r => r.success).length;
+    console.log(`Successfully sent ${successfulSends} out of ${PHONE_NUMBERS.length} messages`);
+    
+    return successfulSends > 0;
+  } catch (error) {
+    console.error('Error in sendMorningMessage:', error.message);
+    return false;
   }
+}
+
 // Parse the MORNING_TIME into hours and minutes for the cron job
 const [hours, minutes] = MORNING_TIME.split(':');
 
-// Schedule the SMS to be sent every morning at the specified time
-// Cron format: minute hour * * * (runs every day at the specified hour:minute)
+// Schedule the message to be sent every morning at the specified time
 cron.schedule(`${minutes} ${hours} * * *`, async () => {
-  console.log(`It's ${MORNING_TIME}! Sending morning SMS...`);
-  await sendMorningSMS();
+  console.log(`It's ${MORNING_TIME}! Sending morning message...`);
+  await sendMorningMessage();
 }, {
   scheduled: true,
   timezone: "Africa/Johannesburg"  
@@ -184,7 +134,7 @@ app.get('/', (req, res) => {
   res.send(`
     <html>
       <head>
-        <title>Morning SMS Service</title>
+        <title>Morning Message Service</title>
         <style>
           body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
           .container { background-color: #f8f9fa; padding: 20px; border-radius: 8px; }
@@ -195,12 +145,15 @@ app.get('/', (req, res) => {
           .button:hover { background-color: #0069d9; }
           .phone-list { margin-top: 15px; }
           .phone-number { background-color: #e9ecef; padding: 5px 10px; margin: 3px; display: inline-block; border-radius: 3px; }
+          .api-status { display: inline-block; padding: 3px 8px; border-radius: 3px; }
+          .configured { background-color: #d4edda; color: #155724; }
+          .not-configured { background-color: #f8d7da; color: #721c24; }
         </style>
       </head>
       <body>
         <div class="container">
-          <h1>Morning SMS Service</h1>
-          <p>This service sends a daily morning SMS at ${MORNING_TIME}.</p>
+          <h1>Morning WhatsApp Message Service</h1>
+          <p>This service sends a daily morning message at ${MORNING_TIME}.</p>
           
           <div class="phone-list">
             <p>Configured phone numbers (${PHONE_NUMBERS.length}):</p>
@@ -209,10 +162,20 @@ app.get('/', (req, res) => {
               : '<span style="color: red;">No phone numbers configured!</span>'}
           </div>
           
-          <p>API Key status: ${TEXTBELT_API_KEY ? 'Configured' : 'Not configured'}</p>
+          <p>Green API Instance ID: 
+            <span class="api-status ${GREENAPI_ID_INSTANCE ? 'configured' : 'not-configured'}">
+              ${GREENAPI_ID_INSTANCE ? 'Configured' : 'Not configured'}
+            </span>
+          </p>
+          
+          <p>Green API Token: 
+            <span class="api-status ${GREENAPI_API_TOKEN ? 'configured' : 'not-configured'}">
+              ${GREENAPI_API_TOKEN ? 'Configured' : 'Not configured'}
+            </span>
+          </p>
           
           <form action="/send-test" method="get">
-            <button class="button" type="submit">Send Test SMS Now</button>
+            <button class="button" type="submit">Send Test Message Now</button>
           </form>
         </div>
       </body>
@@ -220,14 +183,14 @@ app.get('/', (req, res) => {
   `);
 });
 
-// Endpoint to manually trigger an SMS
+// Endpoint to manually trigger a message
 app.get('/send-test', async (req, res) => {
-  const result = await sendMorningSMS();
+  const result = await sendMorningMessage();
   
   res.send(`
     <html>
       <head>
-        <title>Test SMS Result</title>
+        <title>Test Message Result</title>
         <style>
           body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
           .container { background-color: #f8f9fa; padding: 20px; border-radius: 8px; }
@@ -240,14 +203,13 @@ app.get('/send-test', async (req, res) => {
       </head>
       <body>
         <div class="container">
-          <h1>Test SMS Result</h1>
+          <h1>Test Message Result</h1>
           <div class="status ${result ? 'success' : 'error'}">
             ${result ? 
-              `SMS sent successfully to ${PHONE_NUMBERS.length} recipient(s)!` : 
-              'Failed to send SMS. Check console logs for details.'}
+              `Message sent successfully to one or more recipients!` : 
+              'Failed to send messages. Check console logs for details.'}
           </div>
           <p>Check your phone(s) to see if you received the message.</p>
-          <p><small>Note: With the free TextBelt API key, you can only send 1 SMS per day in total.</small></p>
           <a href="/" class="button">Back to Home</a>
         </div>
       </body>
@@ -259,8 +221,13 @@ app.get('/wakeup', (req, res) => {
   console.log('Service woken up by scheduler at:', new Date().toISOString());
   res.status(200).send('Service is awake');
 });
+
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Morning SMS service running on port ${PORT}`);
-  console.log(`Scheduled to send SMS daily at ${MORNING_TIME}`);
+  console.log(`Morning Message service running on port ${PORT}`);
+  console.log(`Scheduled to send WhatsApp messages daily at ${MORNING_TIME}`);
+  
+  // Log configuration status
+  console.log(`Green API credentials status: ${GREENAPI_ID_INSTANCE && GREENAPI_API_TOKEN ? 'Configured' : 'Missing'}`);
+  console.log(`Phone numbers configured: ${PHONE_NUMBERS.length}`);
 });
